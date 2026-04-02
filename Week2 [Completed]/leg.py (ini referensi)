@@ -98,12 +98,6 @@ foot_y  =  a * np.sin(t_vals) * np.cos(t_vals) / denom
 # Coxa sweeps a small oscillation to make the whole leg look alive
 coxa_base = -np.pi / 6          # ~-30° rest angle
 coxa_swing = 0.25 * np.sin(t_vals)   # small swing
-# theta1_frames = coxa_base + coxa_swing
-# Coxa fixed pointing right — IK handles the rest
-# theta1_frames = np.full(N_FRAMES, 0.0)   # 0 rad = pointing along +X
-
-# Replace the fixed coxa line with this:
-# theta1_frames = np.arctan2(foot_y, foot_x) * 0.4  # coxa tracks foot direction
 
 # Option 1 — bigger swing multiplier
 theta1_frames = np.arctan2(foot_y, foot_x) * 0.7  # was 0.4

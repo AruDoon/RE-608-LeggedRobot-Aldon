@@ -1,0 +1,147 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+# ─── Segment lengths ───────────────────────────────────────────────────────────
+L_COXA  = 3.0
+L_FEMUR = 3.0
+L_TIBIA = 3.0
+
+# ─── Forward Kinematics ────────────────────────────────────────────────────────
+def forward_kinematics(theta1, theta2, theta3):
+    """
+    theta1 : coxa  angle (absolute, from X-axis)
+    theta2 : femur angle (relative to coxa)
+    theta3 : tibia angle (relative to femur)
+    Returns: origin, P1 (coxa tip), P2 (femur tip), P3 (tibia tip / foot)
+    """
+    origin = np.array([0.0, 0.0])
+
+    a1 = theta1
+    P1 = origin + L_COXA * np.array([np.cos(a1), np.sin(a1)])
+
+    a2 = a1 + theta2
+    P2 = P1 + L_FEMUR * np.array([np.cos(a2), np.sin(a2)])
+
+    a3 = a2 + theta3
+    P3 = P2 + L_TIBIA * np.array([np.cos(a3), np.sin(a3)])
+
+    return origin, P1, P2, P3
+
+# ─── Drive joint angles directly with sinusoids (pure FK) ─────────────────────
+#  Tuning:
+#    theta1 — coxa sweeps left/right (slow, large amplitude)
+#    theta2 — femur nods up/down    (medium, opposite phase)
+#    theta3 — tibia curls           (fast, creates the crossing loop)
+
+N_FRAMES = 240
+t = np.linspace(0, 2 * np.pi, N_FRAMES, endpoint=False)
+
+# Joint angle schedules (pure FK)
+#  theta1 sweeps 0 → 2π — the whole leg rotates around the base (origin)
+#  theta2 and theta3 are fixed relative angles, keeping the leg shape rigid.
+#  The foot tip (P3) therefore traces a perfect circle centred at the origin.
+
+theta1_t = t                               # coxa sweeps full 360° → drives everything
+theta2_t = np.full(N_FRAMES, -np.pi / 4)  # femur bent -45° relative to coxa (fixed)
+theta3_t = np.full(N_FRAMES, -np.pi / 4)  # tibia bent -45° relative to femur (fixed)
+
+# Pre-compute every frame
+frames_data = [
+    forward_kinematics(theta1_t[i], theta2_t[i], theta3_t[i])
+    for i in range(N_FRAMES)
+]
+
+# Pull out foot trace for the ghost path
+foot_trace = np.array([[P3[0], P3[1]] for (_, _, _, P3) in frames_data])
+
+# ─── Plot setup ───────────────────────────────────────────────────────────────
+fig, ax = plt.subplots(figsize=(8, 8))
+fig.patch.set_facecolor('#0d0d1a')
+ax.set_facecolor('#0d0d1a')
+
+ax.set_xlim(-11, 11)
+ax.set_ylim(-11, 11)
+ax.set_aspect('equal')
+ax.grid(True, color='#1e1e3a', linewidth=0.6, linestyle='--')
+ax.tick_params(colors='#555577')
+for spine in ax.spines.values():
+    spine.set_edgecolor('#1e1e3a')
+
+ax.set_title('Insect Leg – Pure Forward Kinematics (Circular Trace)', color='#aaaacc', fontsize=13, pad=12)
+ax.set_xlabel('X', color='#555577')
+ax.set_ylabel('Y', color='#555577')
+
+# Ghost foot path
+ax.plot(foot_trace[:, 0], foot_trace[:, 1],
+        color='#2a2a4a', linewidth=1.2, linestyle=':', zorder=1)
+
+# Base origin marker
+ax.plot(0, 0, 'o', color='#ffffff', markersize=8, zorder=6)
+ax.text(0.3, 0.3, 'base', color='#aaaacc', fontsize=8, zorder=7)
+
+# ─── Animated artists ─────────────────────────────────────────────────────────
+COXA_COLOR  = '#00ffcc'
+FEMUR_COLOR = '#ff6680'
+TIBIA_COLOR = '#66aaff'
+JOINT_COLOR = '#ffffff'
+
+line_coxa,  = ax.plot([], [], color=COXA_COLOR,  linewidth=4,   solid_capstyle='round', zorder=3)
+line_femur, = ax.plot([], [], color=FEMUR_COLOR, linewidth=3,   solid_capstyle='round', zorder=3)
+line_tibia, = ax.plot([], [], color=TIBIA_COLOR, linewidth=2.5, solid_capstyle='round', zorder=3)
+
+TRAIL = 40
+trail_x = np.full(TRAIL, np.nan)
+trail_y = np.full(TRAIL, np.nan)
+trail_line, = ax.plot([], [], color=TIBIA_COLOR, linewidth=1.8, alpha=0.45, zorder=2)
+
+joint_dots = [
+    ax.plot([], [], 'o', color=JOINT_COLOR, markersize=7, zorder=5)[0]
+    for _ in range(4)
+]
+
+# Static legend instead of moving mid-segment labels
+ax.plot([], [], color=COXA_COLOR,  linewidth=3, label='coxa')
+ax.plot([], [], color=FEMUR_COLOR, linewidth=3, label='femur')
+ax.plot([], [], color=TIBIA_COLOR, linewidth=3, label='tibia')
+ax.legend(loc='upper right', facecolor='#1a1a2e', edgecolor='#333355',
+          labelcolor='white', fontsize=9)
+
+def midpoint(A, B):
+    return (A + B) / 2
+
+def init():
+    line_coxa.set_data([], [])
+    line_femur.set_data([], [])
+    line_tibia.set_data([], [])
+    trail_line.set_data([], [])
+    for d in joint_dots:
+        d.set_data([], [])
+    return line_coxa, line_femur, line_tibia, trail_line, *joint_dots
+
+def update(frame):
+    origin, P1, P2, P3 = frames_data[frame]
+
+    line_coxa.set_data( [origin[0], P1[0]], [origin[1], P1[1]])
+    line_femur.set_data([P1[0],     P2[0]], [P1[1],     P2[1]])
+    line_tibia.set_data([P2[0],     P3[0]], [P2[1],     P3[1]])
+
+    for dot, pt in zip(joint_dots, [origin, P1, P2, P3]):
+        dot.set_data([pt[0]], [pt[1]])
+
+    # Rolling foot trail
+    trail_x[:-1] = trail_x[1:]
+    trail_y[:-1] = trail_y[1:]
+    trail_x[-1] = P3[0]
+    trail_y[-1] = P3[1]
+    trail_line.set_data(trail_x, trail_y)
+
+    return line_coxa, line_femur, line_tibia, trail_line, *joint_dots
+
+ani = animation.FuncAnimation(
+    fig, update, frames=N_FRAMES,
+    init_func=init, interval=16, blit=True
+)
+
+plt.tight_layout()
+plt.show()
