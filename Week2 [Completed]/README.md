@@ -1,15 +1,7 @@
-# Repository RE-608 LeggedRobot Aldon
-
+# Repository RE-608 [WEEK-2 Assignment]
+### STATUS = COMPLETED
 ---
-## Keterangan Info Pemilik Repo 
-Nama     : Aldon Zufar Putra Twyn <br>
-NIM      : 4222301042 <br>
-Kelas    : Robotika - B Pagi <br>
-Semester : 6 <br>
-Prodi    : Robotika <br>
 
-## Latest Upadte Repository 
-Penyelesaian Tugas WEEK-2 [Forward Kinematics]
-
-## Extra Notes
-N/A
+Di assignment ini saya ditugaskan untuk membuat sebuah visualisasi pergerakan kaki 3 Joint (3 engsel) yang menggunakan logika gerak Forward Kinematic lalu mevisualisasikannya menggunakan MatPlotLib. <br>
+Disini saya menggunakan referensi Inverse Kinematic Matplotlib dari teman saya yang dimana referensi ini saya gunakan untuk membuat versi Froward Kinematicnya, hasil dari program visualisasi saya dapat dilihat pada GIF dibawah ini: <br>
+![GIF](./FK_Circular.gif)
