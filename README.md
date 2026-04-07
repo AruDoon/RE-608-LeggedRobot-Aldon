@@ -9,7 +9,7 @@ Semester : 6 <br>
 Prodi    : Robotika <br>
 
 ## Latest Upadte Repository 
-Penyelesaian Tugas WEEK-2 [Forward Kinematics]
+Progress Pengerjaan Tugas WEEK-3 [PLANAR]
 
 ## Extra Notes
 N/A
