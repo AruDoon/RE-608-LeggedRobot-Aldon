@@ -9,7 +9,10 @@ Semester : 6 <br>
 Prodi    : Robotika <br>
 
 ## Latest Upadte Repository 
-Penyelesaian Tugas WEEK-8 [Assignment IK ML, DL, RL]
+Penyelesaian Tugas **WEEK-9 [Quadruped vs Hexapod Gait]**
+
+![Quadruped](<Week9 [Completed]/images/hexapod.png>)
+![Hexapod](<Week9 [Completed]/images/hexapod.png>)
 
 ## Extra Notes
-Hasil result dan juga program assignment week8 itu sendiri dapat dibuka di folder Week8 [Completed]
+Hasil result dan juga program assignment Week-9 itu sendiri dapat dibuka di folder Week9 [Completed]
